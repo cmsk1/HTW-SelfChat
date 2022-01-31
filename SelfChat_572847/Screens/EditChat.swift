@@ -34,9 +34,12 @@ struct EditChat: View {
     
     // Setzt ein neues Chat Item und schließt das Fenster
     func addChatItem() -> Void {
-        let item = ChatItem(text: input, isSender: isSender)
-        contact.chatItems.append(item)
-        input = ""
+        if !input.isEmpty {
+            let item = ChatItem(text: input, isSender: isSender)
+            contact.chatItems.append(item)
+            input = ""
+        }
         dismiss()
+        
     }
 }

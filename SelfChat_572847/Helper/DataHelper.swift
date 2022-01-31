@@ -15,12 +15,19 @@ class ReadData: ObservableObject  {
     }
     
     func loadData()  {
-        guard let url = Bundle.main.url(forResource: "data", withExtension: "json")
-        else {
-            print("Json file not found")
-            return
-        }
         
+        var url = getDocumentsDirectory().appendingPathComponent("data.json")
+        
+        // Wenn im Documents Dir noch keine gespeicherte Datei liegt, wird die Standard data.json mit den Vorgaben genommen, sonst die gespeicherten Daten
+        if !FileManager.default.fileExists(atPath: url.path) {
+            guard let urlBundle = Bundle.main.url(forResource: "data", withExtension: "json")
+            else {
+                print("Json file not found")
+                return
+            }
+            url = urlBundle
+        }
+
         let data = try? Data(contentsOf: url)
         let users = try? JSONDecoder().decode([Contact].self, from: data!)
         self.users = users!
@@ -28,17 +35,13 @@ class ReadData: ObservableObject  {
     }
     
     func writeData(data: [Contact]) -> Void {
-        guard let url = Bundle.main.url(forResource: "data", withExtension: "json")
-        else {
-            print("Json file not found")
-            return
-        }
+        let url = getDocumentsDirectory().appendingPathComponent("data.json")
         do {
             let jsonData = try JSONEncoder().encode(data)
             do {
                 try jsonData.write(to: url)
             } catch {
-                print("Could not write json file")
+                print("Could not write json file: \(error)")
                 return
             }
         } catch {
@@ -46,7 +49,12 @@ class ReadData: ObservableObject  {
             return
         }
         print("json file written")
-        
+
+    }
+    
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
     
 }
